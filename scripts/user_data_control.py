@@ -3,7 +3,10 @@ from scripts.db_connection import create_connection
 from mysql.connector import Error
 
 
-def insert(csv_file):
+def user_insert(csv_file):
+    connection = None
+    cursor = None
+
     try:
         df = pd.read_csv(csv_file)
         connection = create_connection()
@@ -42,7 +45,7 @@ def insert(csv_file):
     except Error as e:
         print(f"오류 발생: {e}")
     finally:
-        if connection.is_connected():
+        if connection and connection.is_connected():
             cursor.close()
             connection.close()
             print("MySQL 연결 종료")
