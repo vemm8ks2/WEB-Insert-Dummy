@@ -3,6 +3,12 @@ from scripts.db_connection import create_connection
 from mysql.connector import Error
 
 
+save_users_query = """
+    INSERT INTO users (id, username, password, gender, role, birth_date, created_at)
+    VALUES (%s, %s, %s, %s, %s, %s, %s);
+"""
+
+
 def user_insert(csv_file):
     connection = None
     cursor = None
@@ -31,13 +37,8 @@ def user_insert(csv_file):
                 row['생성날짜']
             ))
 
-        query = """
-            INSERT INTO users (id, username, password, gender, role, birth_date, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s);
-        """
-
         cursor.execute("UPDATE users_seq SET next_val = %s", (next_val,))
-        cursor.executemany(query, values)
+        cursor.executemany(save_users_query, values)
 
         connection.commit()
         print(f"{len(values)}개의 데이터가 성공적으로 삽입되었습니다.")
