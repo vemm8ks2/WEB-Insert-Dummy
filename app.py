@@ -22,8 +22,9 @@ def main():
         print("메뉴 목록:")
         print("1. 유저 정보 삽입")
         print("2. 상품 정보 삽입")
-        print("3. 주문 정보 삽입")
-        print("4. 프로그램 종료")
+        print("3. 상품 정보 업데이트")
+        print("4. 주문 정보 삽입")
+        print("5. 프로그램 종료")
         print("-" * 50)
 
         try:
@@ -34,19 +35,19 @@ def main():
 
                 if has_file(user_csv_path):
                     user_insert(user_csv_path)
-            elif opt == 2:
+            elif opt == 2 or opt == 3:
                 product_csv_path = input("상품 CSV 파일이 위치한 전체 경로를 기입해주세요: ")
                 product_option_csv_path = input("상품 옵션 CSV 파일이 위치한 전체 경로를 기입해주세요: ")
 
                 if has_file(product_csv_path) and has_file(product_option_csv_path):
                     product_insert(product_csv_path, product_option_csv_path)
-            elif opt == 3:
+            elif opt == 4:
                 order_csv_path = input("주문 CSV 파일이 위치한 전체 경로를 기입해주세요: ")
                 order_item_csv_path = input("주문 정보 CSV 파일이 위치한 전체 경로를 기입해주세요: ")
 
                 if has_file(order_csv_path) and has_file(order_item_csv_path):
                     order_insert(order_csv_path, order_item_csv_path)
-            elif opt == 4:
+            elif opt == 5:
                 print("프로그램을 종료합니다.")
                 break
             else:

@@ -14,21 +14,25 @@ def user_insert(csv_file):
     cursor = None
 
     try:
+        # 파일 읽기
         df = pd.read_csv(csv_file)
+
+        # DB 연결
         connection = create_connection()
+        connection.start_transaction()
         cursor = connection.cursor()
 
+        # Sequence 값 조회
         cursor.execute("SELECT next_val FROM users_seq LIMIT 1")
-        next_val = cursor.fetchone()[0]
+        user_next_val = cursor.fetchone()[0]
 
-        values = []
+        user_values = []
 
         for _, row in df.iterrows():
-            # next_val 값을 증가시킴
-            next_val += 1
+            user_next_val += 1
 
-            values.append((
-                next_val,  # id는 next_val로 설정
+            user_values.append((
+                user_next_val,  # id는 next_val로 설정
                 row['아이디'],
                 row['비밀번호'],
                 row['성별'],
@@ -37,11 +41,14 @@ def user_insert(csv_file):
                 row['생성날짜']
             ))
 
-        cursor.execute("UPDATE users_seq SET next_val = %s", (next_val,))
-        cursor.executemany(save_users_query, values)
+        # Sequence 값 업데이트
+        cursor.execute("UPDATE users_seq SET next_val = %s", (user_next_val,))
+
+        # 유저 저장
+        cursor.executemany(save_users_query, user_values)
 
         connection.commit()
-        print(f"{len(values)}개의 데이터가 성공적으로 삽입되었습니다.")
+        print(f"{len(user_values)}개의 데이터가 성공적으로 삽입되었습니다.")
 
     except Error as e:
         print(f"오류 발생: {e}")

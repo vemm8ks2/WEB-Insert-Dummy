@@ -41,6 +41,12 @@ save_order_items_query = """
     VALUES (%s, %s, %s, %s, %s, %s);
 """
 
+update_product_option_quantity_by_product_id_and_size = """
+    UPDATE product_options
+    SET stock = stock - %s
+    WHERE product_id = %s AND size = %s;
+"""
+
 
 def order_insert(order_csv_file, order_item_csv_file):
     connection = None
@@ -75,6 +81,9 @@ def order_insert(order_csv_file, order_item_csv_file):
             items = item_df[item_df['주문 식별자'] == order_row['식별자']]
             item_values = []
 
+            # 재고 정보 추출
+            quantity_values = []
+
             # 유저 아이디 조회
             cursor.execute(find_user_id_by_username, (order_row['유저 아이디'],))
             user_id = cursor.fetchone()[0]
@@ -99,6 +108,8 @@ def order_insert(order_csv_file, order_item_csv_file):
                     product_id
                 ))
 
+                quantity_values.append((item_row['수량'], product_id, item_row['사이즈']))
+
                 item_cnt += 1
 
             # 주문 정보 삽입
@@ -120,6 +131,10 @@ def order_insert(order_csv_file, order_item_csv_file):
 
             # 주문 목록 정보 삽입
             cursor.executemany(save_order_items_query, item_values)
+
+            # 재고 차감
+            cursor.executemany(update_product_option_quantity_by_product_id_and_size, quantity_values)
+
             order_cnt += 1
 
 
