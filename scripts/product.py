@@ -102,15 +102,15 @@ def product_insert(product_csv_file, product_option_csv_file):
                         has_option[0]
                     ))
                 else:
-                    # 옵션이 존재하지 않는다면 저장
-                    option_next_val += 1
-
                     cursor.execute(save_product_option_query, (
                         option_next_val,
                         option_row['사이즈'],
                         option_row['재고'],
                         product_id
                     ))
+
+                    # 옵션이 존재하지 않는다면 저장
+                    option_next_val += 1
 
                 opt_cnt += 1
             prod_cnt += 1

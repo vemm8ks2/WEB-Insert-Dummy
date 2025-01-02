@@ -74,7 +74,6 @@ def order_insert(order_csv_file, order_item_csv_file):
         order_next_val = cursor.fetchone()[0]
 
         for _, order_row in order_df.iterrows():
-            order_next_val += 1
             total_price = 0
 
             # 상품 정보 추출
@@ -90,8 +89,6 @@ def order_insert(order_csv_file, order_item_csv_file):
 
             # 상품 가격 계산
             for _, item_row in items.iterrows():
-                item_next_val += 1
-
                 cursor.execute(find_price_by_product_name_query, (item_row['상품명'],))
                 product = cursor.fetchone()
 
@@ -110,6 +107,7 @@ def order_insert(order_csv_file, order_item_csv_file):
 
                 quantity_values.append((item_row['수량'], product_id, item_row['사이즈']))
 
+                item_next_val += 1
                 item_cnt += 1
 
             # 주문 정보 삽입
@@ -135,6 +133,7 @@ def order_insert(order_csv_file, order_item_csv_file):
             # 재고 차감
             cursor.executemany(update_product_option_quantity_by_product_id_and_size, quantity_values)
 
+            order_next_val += 1
             order_cnt += 1
 
 

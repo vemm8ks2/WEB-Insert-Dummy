@@ -29,8 +29,6 @@ def user_insert(csv_file):
         user_values = []
 
         for _, row in df.iterrows():
-            user_next_val += 1
-
             user_values.append((
                 user_next_val,  # id는 next_val로 설정
                 row['아이디'],
@@ -40,6 +38,8 @@ def user_insert(csv_file):
                 row['생일'],
                 row['생성날짜']
             ))
+
+            user_next_val += 1
 
         # Sequence 값 업데이트
         cursor.execute("UPDATE users_seq SET next_val = %s", (user_next_val,))
