@@ -1,7 +1,8 @@
+import os
 import pandas as pd
+
 from scripts.db_connection import create_connection
 from mysql.connector import Error
-import os
 from dotenv import load_dotenv
 
 
@@ -14,16 +15,8 @@ save_product_query = """
 """
 
 save_product_option_query = """
-    INSERT INTO product_options (id, size, stock, product_id) 
-    VALUES (%s, %s, %s, %s);
-"""
-
-find_products_seq_query = """
-    SELECT next_val FROM product_options_seq LIMIT 1
-"""
-
-update_products_seq_query = """
-    UPDATE product_options_seq SET next_val = %s
+    INSERT INTO product_options (size, stock, product_id) 
+    VALUES (%s, %s, %s);
 """
 
 find_product_by_title_query = """
@@ -42,8 +35,8 @@ update_product_option_quantity_by_id = """
     WHERE id = %s;
 """
 
-def product_insert(product_csv_file, product_option_csv_file):
-    connection = None
+def product_insert(product_csv_file, product_option_csv_file, conn = None):
+    connection = conn
     cursor = None
 
     try:
@@ -55,13 +48,11 @@ def product_insert(product_csv_file, product_option_csv_file):
         option_df = pd.read_csv(product_option_csv_file)
 
         # DB 연결
-        connection = create_connection()
-        connection.start_transaction()
-        cursor = connection.cursor()
+        if conn is None:
+            connection = create_connection()
+            connection.start_transaction()
 
-        # Sequence 값 조회
-        cursor.execute(find_products_seq_query)
-        option_next_val = cursor.fetchone()[0]
+        cursor = connection.cursor()
 
         for _, product_row in product_df.iterrows():
             # 상품 조회
@@ -103,28 +94,47 @@ def product_insert(product_csv_file, product_option_csv_file):
                     ))
                 else:
                     cursor.execute(save_product_option_query, (
-                        option_next_val,
                         option_row['사이즈'],
                         option_row['재고'],
                         product_id
                     ))
 
-                    # 옵션이 존재하지 않는다면 저장
-                    option_next_val += 1
-
                 opt_cnt += 1
             prod_cnt += 1
 
-        # Sequence 값 업데이트
-        cursor.execute(update_products_seq_query, (option_next_val,))
+        if conn is None:
+            connection.commit()
 
-        connection.commit()
         print(f"{prod_cnt}개의 상품 데이터와 {opt_cnt}개의 옵션이 성공적으로 삽입 혹은 업데이트 되었습니다.")
 
     except Error as e:
         print(f"오류 발생: {e}")
     finally:
-        if connection and connection.is_connected():
+        if conn is None and connection and connection.is_connected():
             cursor.close()
             connection.close()
             print("MySQL 연결 종료")
+
+def product_full_insert(product_full_path):
+    conn = None
+
+    try:
+        conn = create_connection()
+        conn.start_transaction()
+
+        full_path_df = pd.read_csv(product_full_path)
+
+        for _, full_path_row in full_path_df.iterrows():
+            product_insert(full_path_row['상품 CSV'], full_path_row['상품 정보 CSV'], conn)
+
+        conn.commit()
+
+    except Error as e:
+        print(f"오류 발생: {e}")
+    finally:
+        if  conn and conn.is_connected():
+            conn.cursor().close()
+            conn.close()
+            print("MySQL 연결 종료")
+
+    print("\n상품 및 상품 정보 일괄 삽입 완료")

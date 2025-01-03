@@ -4,8 +4,8 @@ from mysql.connector import Error
 
 
 save_users_query = """
-    INSERT INTO users (id, username, password, gender, role, birth_date, created_at)
-    VALUES (%s, %s, %s, %s, %s, %s, %s);
+    INSERT INTO users (username, password, gender, role, birth_date, created_at)
+    VALUES (%s, %s, %s, %s, %s, %s);
 """
 
 
@@ -22,15 +22,11 @@ def user_insert(csv_file):
         connection.start_transaction()
         cursor = connection.cursor()
 
-        # Sequence 값 조회
-        cursor.execute("SELECT next_val FROM users_seq LIMIT 1")
-        user_next_val = cursor.fetchone()[0]
-
         user_values = []
 
         for _, row in df.iterrows():
             user_values.append((
-                user_next_val,  # id는 next_val로 설정
+                #user_next_val,  # id는 next_val로 설정
                 row['아이디'],
                 row['비밀번호'],
                 row['성별'],
@@ -38,11 +34,6 @@ def user_insert(csv_file):
                 row['생일'],
                 row['생성날짜']
             ))
-
-            user_next_val += 1
-
-        # Sequence 값 업데이트
-        cursor.execute("UPDATE users_seq SET next_val = %s", (user_next_val,))
 
         # 유저 저장
         cursor.executemany(save_users_query, user_values)
