@@ -66,12 +66,8 @@ def order_insert(order_csv_file, order_item_csv_file, conn = None):
             cursor.execute(find_user_id_by_username, (order_row['유저 아이디'],))
             user_id = cursor.fetchone()[0]
 
-            print('\n유저 아이디:', order_row['유저 아이디'])
-
             # 상품 가격 계산
             for _, item_row in items.iterrows():
-                print('-- 상품:', item_row['상품명'], ' || ', item_row['사이즈'], ' || ', item_row['수량'])
-
                 cursor.execute(find_price_by_product_name_query, (item_row['상품명'],))
                 product = cursor.fetchone()
 

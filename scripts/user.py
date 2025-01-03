@@ -26,7 +26,6 @@ def user_insert(csv_file):
 
         for _, row in df.iterrows():
             user_values.append((
-                #user_next_val,  # id는 next_val로 설정
                 row['아이디'],
                 row['비밀번호'],
                 row['성별'],
