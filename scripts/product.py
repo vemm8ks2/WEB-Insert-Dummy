@@ -76,7 +76,7 @@ def product_insert(product_csv_file, product_option_csv_file, conn = None):
                 product_id = cursor.lastrowid
 
             # 상품명이 같은 옵션만 추출
-            options = option_df[option_df['상품명'].str.match(product_row['상품명'], na=False)]
+            options = option_df[option_df['상품명'].apply(str) == str(product_row['상품명'])]
 
             for _, option_row in options.iterrows():
                 # 옵션 조회
